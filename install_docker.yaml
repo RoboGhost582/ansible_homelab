@@ -1,0 +1,29 @@
+---
+- name: Upload and run a script
+  hosts: all
+  become: yes
+  tasks:
+  
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - curl
+        state: present
+        
+    - name: Fetch Script
+      ansible.builtin.command:
+        cmd: curl -fsSL https://get.docker.com -o get-docker.sh
+      register: fetch_output
+
+    - name: Display the curl command output
+      debug:
+        var: fetch_output.stdout
+
+    - name: Install Docker
+      ansible.builtin.command:
+        cmd: sh get-docker.sh
+      register: script_output
+
+    - name: Display the script output
+      debug:
+        var: script_output.stdout
