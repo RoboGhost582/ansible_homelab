@@ -1,0 +1,28 @@
+---
+- name: Deploy and execute Docker Compose and Bash script
+  hosts: all
+  become: yes
+
+  vars:
+    target_directory: /tmp/
+    docker_compose_file: compose.yml
+    bash_script_file: run_script.sh
+    folder_name: docker
+
+  tasks:
+    - name: Ensure the target directory exists
+      file:
+        path: "{{ target_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy Bash script to the target directory
+      copy:
+        src: "{{ folder_name }}/{{ bash_script_file }}"
+        dest: "{{ target_directory }}/{{ bash_script_file }}"
+        mode: '0755'
+
+    - name: Run the Bash script
+      command: "{{ target_directory }}/{{ bash_script_file }}"
+      args:
+        chdir: "{{ target_directory }}"
