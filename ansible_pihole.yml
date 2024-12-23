@@ -7,7 +7,7 @@
     target_directory: /tmp/
     docker_compose_file: compose.yml
     bash_script_file: run_script.sh
-    folder_name: homepage
+    folder_name: pihole
 
   tasks:
     - name: Ensure the target directory exists
