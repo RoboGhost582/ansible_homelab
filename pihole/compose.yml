@@ -6,7 +6,7 @@ services:
     # For DHCP it is recommended to remove these ports and instead add: network_mode: "host"
     ports:
       - "53:53/tcp"
-      - "53:53/udp"
+      - "153:153/udp"
       - "67:67/udp" # Only required if you are using Pi-hole as your DHCP server
       - "80:80/tcp"
     environment:
