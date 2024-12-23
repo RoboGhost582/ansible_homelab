@@ -27,3 +27,9 @@
     - name: Display the script output
       debug:
         var: script_output.stdout
+
+    - name: Install required packages
+      ansible.builtin.apt:
+        name:
+          - docker-compose
+        state: present
