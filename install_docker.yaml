@@ -1,6 +1,7 @@
 ---
 - name: Upload and run a script
   hosts: all
+  become: true
   tasks:
   
     - name: Install required packages
