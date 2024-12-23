@@ -29,7 +29,7 @@
 
     - name: Run the Bash script
       command: "{{ target_directory }}/{{ bash_script_file }}"
-        args:
+      args:
         chdir: "{{ target_directory }}"
 
     - name: Run Docker Compose
