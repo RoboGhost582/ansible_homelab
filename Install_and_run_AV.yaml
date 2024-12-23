@@ -1,0 +1,32 @@
+---
+- name: Install and run ClamAV
+  hosts: all
+  become: yes
+  tasks:
+    - name: Update package cache
+      ansible.builtin.apt:
+        update_cache: yes
+      when: ansible_distribution == "Debian"
+
+    - name: Install ClamAV
+      ansible.builtin.package:
+        name: clamav
+        state: present
+
+    - name: Update ClamAV virus database
+      ansible.builtin.command:
+        cmd: freshclam
+      register: freshclam_output
+
+    - name: Show freshclam output
+      debug:
+        var: freshclam_output.stdout
+
+    - name: Scan the /tmp directory with ClamAV
+      ansible.builtin.command:
+        cmd: clamscan -r /
+      register: scan_output
+
+    - name: Show scan output
+      debug:
+        var: scan_output.stdout
