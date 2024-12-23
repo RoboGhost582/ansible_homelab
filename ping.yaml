@@ -1,6 +1,7 @@
 ---
-- hosts: all
-  become" true
-  gather_facts: false
+- name: Ping all hosts
+  hosts: all
+  gather_facts: no
   tasks:
-    - ping:
+    - name: Ping hosts
+      ping:
