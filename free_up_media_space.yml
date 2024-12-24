@@ -26,3 +26,9 @@
       command: "{{ target_directory }}/{{ bash_script_file }}"
       args:
         chdir: "{{ target_directory }}"
+      register: script_output
+
+    - name: Display the script output
+      debug:
+        var: script_output.stdout
+
