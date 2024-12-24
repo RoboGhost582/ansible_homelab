@@ -1,35 +1,38 @@
 ---
-- name: Upload and run a script
-  hosts: all
+- name: Install docker
+  hosts: "{{ my_hosts | d([]) }}"
   become: true
+
   tasks:
-  
-    - name: Install required packages
+    - name: Install docker dependencies
       ansible.builtin.apt:
         name:
+          - apt-transport-https
+          - ca-certificates
           - curl
+          - gnupg-agent
+          - software-properties-common
+        update_cache: true
+
+    - name: Add docker gpg key
+      ansible.builtin.apt_key:
+        url: https://download.docker.com/linux/ubuntu/gpg
         state: present
-        
-    - name: Fetch Script
-      ansible.builtin.command:
-        cmd: sudo curl -fsSL https://get.docker.com -o get-docker.sh
-      register: fetch_output
+        keyring: /etc/apt/keyrings/docker.gpg
 
-    - name: Display the curl command output
-      debug:
-        var: fetch_output.stdout
+    - name: Add docker repository
+      ansible.builtin.apt_repository:
+        filename: docker
+        repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_lsb.codename | lower }} stable
+        state: present
 
-    - name: Install Docker
-      ansible.builtin.command:
-        cmd: sudo sh get-docker.sh
-      register: script_output
-
-    - name: Display the script output
-      debug:
-        var: script_output.stdout
-
-    - name: Install required packages
+    - name: Install docker engine
       ansible.builtin.apt:
         name:
-          - docker-compose
-        state: present
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+          - docker-buildx-plugin
+          - docker-scan-plugin
+          - docker-compose-plugin
+        update_cache: true
