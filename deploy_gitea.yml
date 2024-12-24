@@ -1,59 +1,39 @@
 ---
-- name: Deploy portainer-ce latest
+- name: Deploy and execute Docker Compose and Bash script
   hosts: all
-  become: true
+  become: yes
+
+  vars:
+    target_directory: /tmp/
+    docker_compose_file: compose.yml
+    bash_script_file: run_script.sh
+    folder_name: gitea
 
   tasks:
-  - name: create directories if they don't exist
-    file:
-      path: "/"
-      state: directory
-      owner: root
-      group: root
-      mode: 0775
-    loop:
-      - /docker
-      - /docker/gitea
-      - /docker/gitea/etc
-      - /docker/gitea/etc/timezone
-      - /docker/gitea/etc/localtime
-      - /docker/postgres
-        
-      - name: Deploy gitea
-        community.docker.docker_container:
-          name: gitea
-          image: gitea/gitea:latest
-          container_name: gitea
-          environment:
-            - USER_UID=1000
-            - USER_GID=1000
-            - GITEA__database__DB_TYPE=postgres
-            - GITEA__database__HOST=db:5432
-            - GITEA__database__NAME=gitea
-            - GITEA__database__USER=gitea
-            - GITEA__database__PASSWD=gitea
-          restart: always
-          volumes:
-            - /docker/gitea:/data
-            - /docker/gitea/etc/timezone:/etc/timezone:ro
-            - /docker/gitea/etc/localtime:/etc/localtime:ro
-          depends_on:
-            - db
-          networks:
-            - proxy
-          security_opt:
-            - no-new-privileges:true
-            
-      - name: Deploy postgres
-        community.docker.docker_container:
-          name: db
-          image: postgres:14
-          restart: always
-          environment:
-            - POSTGRES_USER=gitea
-            - POSTGRES_PASSWORD=gitea
-            - POSTGRES_DB=gitea
-          volumes:
-            - /docker/postgres:/var/lib/postgresql/data
-          networks:
-            - proxy
+    - name: Ensure the target directory exists
+      file:
+        path: "{{ target_directory }}"
+        state: directory
+        mode: '0755'
+
+    - name: Copy Docker Compose file to the target directory
+      copy:
+        src: "{{ folder_name }}/{{ docker_compose_file }}"
+        dest: "{{ target_directory }}/{{ docker_compose_file }}"
+        mode: '0644'
+
+    - name: Copy Bash script to the target directory
+      copy:
+        src: "{{ folder_name }}/{{ bash_script_file }}"
+        dest: "{{ target_directory }}/{{ bash_script_file }}"
+        mode: '0755'
+
+    - name: Run the Bash script
+      command: "{{ target_directory }}/{{ bash_script_file }}"
+      args:
+        chdir: "{{ target_directory }}"
+
+    - name: Run Docker Compose
+      command: "docker compose up -d"
+      args:
+        chdir: "{{ target_directory }}"
